@@ -1,0 +1,14 @@
+4: Estou bem, obrigado.👍
+8|12: Estou com febre
+8|12|16|20: estou com febre e calafrios
+8|12|16: Preciso de ajuda urgente.🆘 indicador, médio, anelar
+4|8|12|16|20: Me leve ao hospital, por favor.🏥
+12|16: Dor nas costas.😣
+0|8|12|16|20: Estou com tontura.😵punho fechado
+0|4|8|12|16|20: Estou em pânico.🚨
+4|8|12: muita dor de cabeça e estômago
+4|8|12|16: preciso de ajuda urgente
+: estou com tontura
+12|16|20: minha medicação acabou
+
+uvicorn app:app --reload

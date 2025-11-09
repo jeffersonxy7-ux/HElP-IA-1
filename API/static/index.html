@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HELP AI</title>
+  <link rel="shortcut icon" href="img/favIcon2.jpg" type="image/x-icon">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Poppins:wght@400;600&display=swap');
+    :root {
+      --azul-escuro: #0D335E;
+      --azul-medio: #25B4E0;
+      --azul-claro: #6FE0FA;
+      --azul-quase-branco: #E0F8FC;
+      --cinza-escuro: #5B6C7C;
+      --branco: #FFFFFF;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+    body { background:var(--azul-quase-branco); display:flex; flex-direction:column; align-items:center; min-height:100vh; color:var(--azul-escuro); }
+    header { width:100%; background:var(--azul-escuro); color:var(--branco); padding:12px 24px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 3px 6px rgba(0,0,0,0.15); }
+    .logo { font-family:'Archivo Black', sans-serif; font-size:26px; }
+    .highlight { color:var(--azul-medio); }
+    .social { color:#FFF; text-decoration:none; font-weight:600; }
+    .top-right { display:flex; align-items:center; gap:8px; }
+    .logo_instagram { width:18px; height:18px; object-fit:contain; }
+    main { width:100%; max-width:900px; padding:20px; display:flex; flex-direction:column; gap:16px; align-items:center; }
+    .info { background:var(--azul-claro); color:var(--azul-escuro); padding:12px 20px; width:90%; max-width:480px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    .camera-section { text-align:center; background:var(--branco); padding:24px; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.1); width:90%; max-width:480px; }
+    .robot { width:160px; margin:6px auto; display:block; }
+    #status { font-size:20px; color:var(--azul-escuro); margin-bottom:8px; }
+    .stream { width:100%; border-radius:10px; border:2px solid var(--azul-medio); margin-top:10px; display:block; }
+    #gestureBox { background:var(--azul-medio); color:white; padding:10px; border-radius:10px; margin-top:12px; font-weight:600; display:inline-block; min-width:180px; }
+    .controls { display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+    button, input[type="submit"], select { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+    .btn-primary { background:var(--azul-medio); color:white; }
+    .btn-ghost { background:transparent; border:1px solid var(--azul-medio); color:var(--azul-medio); }
+    .save-form { margin-top:14px; display:flex; gap:8px; flex-direction:column; align-items:center; }
+    .save-row { display:flex; gap:8px; width:100%; justify-content:center; flex-wrap:wrap; }
+    input[type="text"] { padding:8px 10px; border-radius:8px; border:1px solid #ddd; min-width:120px; }
+    footer { margin-top:20px; padding:10px; font-size:12px; color:#333; width:100%; text-align:center; }
+    .note { font-size:12px; color:var(--cinza-escuro); margin-top:8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">HELP <span class="highlight">AI</span></div>
+    <div class="top-right">
+      <img src="img/instagram (1).png" class="logo_instagram" alt="insta">
+      <a href="#" class="social">Siga-nos</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="info">
+      <p><strong>Paciente:</strong> Nome do paciente</p>
+      <p><strong>Leito:</strong> Número do leito</p>
+    </section>
+
+    <section class="camera-section">
+      <img src="img/Frame 2 (1).png" alt="Robo" class="robot">
+      <h2 id="status">CÂMERA ATIVA</h2>
+
+      <img id="stream" class="stream" src="/video_feed" alt="Vídeo da câmera (processado)">
+      <div id="gestureBox">Aguardando gesto...</div>
+
+      <div class="controls">
+        <button id="toggleSpeak" class="btn-primary">🔊 Fala automática: ON</button>
+        <button id="speakNow" class="btn-ghost">🔊 Falar agora</button>
+      </div>
+
+      <div class="controls">
+        <select id="voiceSelect" class="btn-ghost"></select>
+        <button id="testVoice" class="btn-primary">🎤 Testar voz</button>
+      </div>
+
+      <div class="controls">
+        <button id="exportBtn" class="btn-ghost">📄 Exportar Gestos</button>
+      </div>
+
+      <div class="note">Salve novos gestos abaixo para treinar o HELP AI.</div>
+
+      <form id="saveGestureForm" class="save-form">
+        <div class="save-row">
+          <input id="dedosInput" type="text" placeholder='Dedos (ex: "8|12")' required>
+          <input id="mensagemInput" type="text" placeholder='Mensagem (ex: "Preciso de ajuda")' required>
+        </div>
+        <div class="save-row">
+          <input type="submit" value="💾 Salvar gesto" class="btn-primary">
+          <div id="saveResult" style="align-self:center;color:green;font-weight:600;"></div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>© 2025 HELP AI. Desenvolvido por Alunos de Engenharia de Software.</footer>
+
+  <script>
+    let voices = [];
+    let selectedVoice = null;
+    let lastGesture = null;
+    let autoSpeak = true;
+    let lastSpokenAt = 0;
+    const speakCooldownMs = 1600;
+
+    const gestureBox = document.getElementById("gestureBox");
+    const toggleSpeak = document.getElementById("toggleSpeak");
+    const speakNow = document.getElementById("speakNow");
+    const voiceSelect = document.getElementById("voiceSelect");
+    const testVoice = document.getElementById("testVoice");
+    const exportBtn = document.getElementById("exportBtn");
+    const saveForm = document.getElementById("saveGestureForm");
+    const dedosInput = document.getElementById("dedosInput");
+    const mensagemInput = document.getElementById("mensagemInput");
+    const saveResult = document.getElementById("saveResult");
+
+    // Carregar e preencher vozes disponíveis
+    function loadVoices() {
+      voices = window.speechSynthesis.getVoices();
+      voiceSelect.innerHTML = "";
+      voices.forEach((v, i) => {
+        const opt = document.createElement("option");
+        opt.value = v.name;
+        opt.textContent = `${v.name} (${v.lang})`;
+        voiceSelect.appendChild(opt);
+      });
+      // Restaura voz anterior
+      const savedVoice = localStorage.getItem("helpai_voice");
+      if (savedVoice && voices.some(v => v.name === savedVoice)) {
+        voiceSelect.value = savedVoice;
+        selectedVoice = voices.find(v => v.name === savedVoice);
+      } else {
+        selectedVoice = voices[0];
+      }
+    }
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    function speakText(text) {
+      if (!text || text.trim() === "") return;
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 1;
+      if (selectedVoice) utter.voice = selectedVoice;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+    }
+
+    // --- Eventos ---
+    voiceSelect.addEventListener("change", () => {
+      const name = voiceSelect.value;
+      selectedVoice = voices.find(v => v.name === name);
+      localStorage.setItem("helpai_voice", name);
+    });
+
+    testVoice.addEventListener("click", () => {
+      speakText("Olá! Eu sou a voz do HELP AI.");
+    });
+
+    toggleSpeak.addEventListener("click", () => {
+      autoSpeak = !autoSpeak;
+      toggleSpeak.textContent = `🔊 Fala automática: ${autoSpeak ? "ON" : "OFF"}`;
+      toggleSpeak.classList.toggle("btn-primary", autoSpeak);
+      toggleSpeak.classList.toggle("btn-ghost", !autoSpeak);
+    });
+
+    speakNow.addEventListener("click", () => {
+      speakText(lastGesture || "Nenhum gesto detectado");
+    });
+
+    exportBtn.addEventListener("click", () => window.location.href = "/export");
+
+    // --- Receber gestos do servidor ---
+    const evt = new EventSource("/events");
+    evt.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        const gesto = data.gesto || "Nenhum";
+        const critical = !!data.critical;
+        gestureBox.textContent = gesto;
+        gestureBox.style.background = critical ? "#FF4D4D" : "#25B4E0";
+
+        const now = Date.now();
+        if (gesto !== lastGesture) {
+          lastGesture = gesto;
+          if (autoSpeak && now - lastSpokenAt > speakCooldownMs) {
+            speakText(gesto);
+            lastSpokenAt = now;
+          }
+        }
+      } catch (err) {
+        console.error("Erro SSE:", err);
+      }
+    };
+
+    // --- Salvar gesto ---
+    saveForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const dedos = dedosInput.value.trim();
+      const mensagem = mensagemInput.value.trim();
+      if (!dedos || !mensagem) {
+        saveResult.textContent = "Preencha os campos.";
+        saveResult.style.color = "red";
+        return;
+      }
+      const form = new FormData();
+      form.append("dedos", dedos);
+      form.append("mensagem", mensagem);
+      const res = await fetch("/save_gesture", { method: "POST", body: form });
+      if (res.ok) {
+        saveResult.textContent = "Gesto salvo ✓";
+        saveResult.style.color = "green";
+        dedosInput.value = "";
+        mensagemInput.value = "";
+        setTimeout(() => saveResult.textContent = "", 3000);
+      } else {
+        saveResult.textContent = "Erro ao salvar";
+        saveResult.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>
+
+
